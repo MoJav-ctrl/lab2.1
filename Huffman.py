@@ -1,60 +1,59 @@
-# Huffman Coding in python
-
-string = 'BCAADDDCCACACAC'
-
+from heapq import heappush, heappop, heapify
 
 # Creating tree nodes
 class NodeTree(object):
-
-    def __init__(self, left=None, right=None):
+    def __init__(self, char=None, freq=0, left=None, right=None):
+        self.char = char
+        self.freq = freq
         self.left = left
         self.right = right
 
-    def children(self):
-        return (self.left, self.right)
-
-    def nodes(self):
-        return (self.left, self.right)
-
-    def __str__(self):
-        return '%s_%s' % (self.left, self.right)
+    def __lt__(self, other):
+        return self.freq < other.freq
 
 
-# Main function implementing huffman coding
-def huffman_code_tree(node, left=True, binString=''):
-    if type(node) is str:
-        return {node: binString}
-    (l, r) = node.children()
-    d = dict()
-    d.update(huffman_code_tree(l, True, binString + '0'))
-    d.update(huffman_code_tree(r, False, binString + '1'))
-    return d
+# Main function implementing Huffman coding
+def huffman_code_tree(frequencies):
+    heap = [NodeTree(char, freq) for char, freq in frequencies]
+    heapify(heap)
+
+    while len(heap) > 1:
+        left = heappop(heap)
+        right = heappop(heap)
+        parent = NodeTree(freq=left.freq + right.freq, left=left, right=right)
+        heappush(heap, parent)
+
+    return heap[0]
 
 
-# Calculating frequency
-freq = {}
-for c in string:
-    if c in freq:
-        freq[c] += 1
-    else:
-        freq[c] = 1
+# Traversing the Huffman tree to get codes
+def traverse_tree(node, code='', huffman_codes={}):
+    if node is not None:
+        if node.char is not None:
+            huffman_codes[node.char] = code
+        traverse_tree(node.left, code + '0', huffman_codes)
+        traverse_tree(node.right, code + '1', huffman_codes)
+    return huffman_codes
 
-freq = sorted(freq.items(), key=lambda x: x[1], reverse=True)
 
-nodes = freq
+def main():
+    string = 'BCAADDDCCACACAC'
+    
+    # Calculating frequency
+    freq = {}
+    for char in string:
+        freq[char] = freq.get(char, 0) + 1
 
-while len(nodes) > 1:
-    (key1, c1) = nodes[-1]
-    (key2, c2) = nodes[-2]
-    nodes = nodes[:-2]
-    node = NodeTree(key1, key2)
-    nodes.append((node, c1 + c2))
+    frequencies = [(char, freq) for char, freq in freq.items()]
+    frequencies.sort(key=lambda x: x[1])
 
-    nodes = sorted(nodes, key=lambda x: x[1], reverse=True)
+    huffman_tree = huffman_code_tree(frequencies)
+    huffman_codes = traverse_tree(huffman_tree)
 
-huffmanCode = huffman_code_tree(nodes[0][0])
+    print(' Char | Huffman code ')
+    print('----------------------')
+    for char, frequency in frequencies:
+        print(f' {char:<5}| {huffman_codes[char]}')
 
-print(' Char | Huffman code ')
-print('----------------------')
-for (char, frequency) in freq:
-    print(' %-4r |%12s' % (char, huffmanCode[char]))
+if __name__ == "__main__":
+    main()
