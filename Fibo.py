@@ -1,17 +1,25 @@
-# Python program to display the Fibonacci sequence
+# Using memoization to store previously computed Fibonacci numbers
+fibonacci_cache = {}
 
 def recur_fibo(n):
-   if n <= 1:
-       return n
-   else:
-       return(recur_fibo(n-1) + recur_fibo(n-2))
+    if n in fibonacci_cache:
+        return fibonacci_cache[n]
 
-nterms = 10
+    if n <= 1:
+        fibonacci_cache[n] = n
+    else:
+        fibonacci_cache[n] = recur_fibo(n - 1) + recur_fibo(n - 2)
 
-# check if the number of terms is valid
-if nterms <= 0:
-   print("Plese enter a positive integer")
-else:
-   print("Fibonacci sequence:")
-   for i in range(nterms):
-       print(recur_fibo(i))
+    return fibonacci_cache[n]
+
+def print_fibonacci_sequence(nterms):
+    if nterms <= 0:
+        print("Please enter a positive integer")
+    else:
+        print("Fibonacci sequence:")
+        for i in range(nterms):
+            print(recur_fibo(i), end=" ")
+
+if __name__ == "__main__":
+    nterms = 10
+    print_fibonacci_sequence(nterms)
